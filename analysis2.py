@@ -85,14 +85,18 @@ qeight = []
 for ans in data['Q8']:
     ansFull = ''.join(ans).lower()
     ansFull = ansFull.replace("and", " ").replace("tik tok","tiktok").replace("imessages", "imessage").replace(".", "").replace(",", "").replace("instragram", "instagram").replace("what's app", "whatsapp").replace("(social media)", "").replace(",", "").replace(".", "").replace("i think instagram youtube   two dots (a game) are the most used apps", "instagram, youtube")
-    ansFull = ansFull.replace("netflitwitter", "netflix, twitter").replace(",", "").replace("twitter(x)", "twitter").replace("x", "twitter").replace("g-mail", "gmail")
+    ansFull = ansFull.replace(",", "").replace("twitter(x)", "twitter").replace("g-mail", "gmail").replace(" x ", " twitter ")
+    ansFull = ansFull.replace("neteflix", "netflix").replace("nan", "").replace("monopoly go", "monopoly-go")
+    ansFull = ansFull.replace("red book", "red-book ")
+    
     ans = ansFull.split(" ")
-    print(ans)
     qeight.append([app.strip() for app in ans])
     
 allqeight = flatten(qeight)
 
 uniqueAllQEight = pd.Series(allqeight).value_counts()
+
+data['Q8'] = qeight
         
         
 
