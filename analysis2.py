@@ -101,3 +101,83 @@ data['Q8'] = qeight
         
 
 #%%
+
+
+#%% Useful Questions
+
+# q1: how many devices do you use
+# q6: estimate daily average vs. q24 avg daily screentime
+#q7 category vs. q25 most used category
+
+
+
+q6 = [d.replace(" hours", "").split("-") for d in data['Q6']]
+
+estimatedHrs = [(int(hrs[1]) + int(hrs[0])) /2 for hrs in q6]
+
+
+import re
+
+def convert_to_numerical_time(time_list):
+    numerical_values = []
+
+    for time_str in time_list:
+        # Extract numerical values using regular expressions
+        match = re.findall(r'\d+\.\d+|\d+', time_str)
+        
+        # Convert the extracted values to float and sum them up
+        if match:
+            total_minutes = sum(float(value) for value in match)
+            numerical_values.append(total_minutes)
+        else:
+            numerical_values.append(None)  # Handle cases where no numerical values are found
+
+    return numerical_values
+
+
+# Example usage:
+actualHrs = convert_to_numerical_time(data['Q24'])
+
+for h,hr in enumerate(actualHrs):
+   if(hr is None or float(hr) > 24):
+       
+       print("IDX:", int(h), "RAW DATA:", data.Q24[int(h)+3], "NEW DATA:", hr)
+       
+
+actualHrs[0] = 3 + (38/60)
+actualHrs[6] = 2.5
+actualHrs[10] = 3 + (40/60)
+actualHrs[21] = 7
+actualHrs[29] = 5
+actualHrs[34] = 5
+actualHrs[35] = 10 + (47/60)
+actualHrs[36] = 0
+actualHrs[41] = 7.3
+actualHrs[43] = 3
+actualHrs[49] = 7
+actualHrs[50] = 3 + (43/60)
+actualHrs[54] = 3
+
+import matplotlib.pyplot as plt
+
+hrDiff = [actualHrs[h] - estimatedHrs[h] for h in list(range(0, len(estimatedHrs)))]
+
+hrDiff = [float(hr) for hr in hrDiff]
+actualHrs = [float(hr) for hr in actualHrs]
+estimatedHrs = [float(hr) for hr in estimatedHrs]
+
+
+organizedData = pd.DataFrame(data = {"age": data['Q38'], 
+                                     "actualHrs": actualHrs, 
+                                     "estimatedHrs": estimatedHrs, 
+                                     "hrDiff": hrDiff })
+
+organizedData = organizedData.drop(12)
+organizedData.reset_index(drop=True)
+
+plt.scatter(organizedData["age"], organizedData["hrDiff"])
+plt.scatter(organizedData["age"].astype(int), organizedData["hrDiff"].astype(int))
+
+
+
+#%%
