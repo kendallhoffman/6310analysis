@@ -186,6 +186,9 @@ hrDiff = [float(hr) for hr in hrDiff]
 actualHrs = [float(hr) for hr in actualHrs]
 estimatedHrs = [float(hr) for hr in estimatedHrs]
 
+#  RESET INDEX
+data.reset_index(drop = True, inplace= True)
+
 #%% 
 
 #%% Q2: NUM OF SMARTPHONE DEVICES
@@ -202,22 +205,20 @@ smartphoneDevices = [convertSmartphoneDevices(i) for i in data['Q2']]
 
 #%% 
 
-
-#%% Q9: USES SCREEN REDUCTION TECHNIQUES
-
+# FUNCTION FOR YES:1 AND NO:0
 def convertYesNo(resp):
     if(resp == 'No'):
         return 0
     else:
         return 1
-usesScreenRedTech = [convertYesNo(r) for r in data['Q9']]
-
-#%%
+#FUNCTION TO CONVERT BINARY VAR USING THE RESPONSE AND A TERM TO MAKE IT 1
+def convertBinary(resp, term):
+    if(resp == term): return 1
+    else: return 0
 
 
 
 #%% Q11 TYPES OF SCREEN REDUCTION TECHNIQUES
-
 
 def convertRedTechToList(s):
     s = s.replace("family, friends,","family friends").replace("computer, keep", "computer keep").replace("brightness, set", "brightness set").replace("silent, face-down, out of sight,", "silent face-down out of sight ").replace(" white), and chan", " white) and chan")
@@ -228,29 +229,94 @@ redTechniquesAmt = [len(s) for s in redTechniques]
 
 #%%
 
+#%% Q48: AGE OF FIRST SMARTPHONE
 
-#%% Q29: GENDER
+def rangeAvg(strRange):
+    if(strRange=="18+"): return 18
+    strList= strRange.split("-")
+    intRange = [int(s) for s in strList]
+    return sum(intRange)/2
+    
+firstSmartphoneAge = [rangeAvg(r) for r in data['Q48']]
+
+#%%
+
+
+
+#%% ONE LINER CONVERSIONS
+
+# Q9: USES SCREEN REDUCTION TECHNIQUES (1 if use them, 0 if not)
+usesScreenRedTech = [convertYesNo(r) for r in data['Q9']]
+
+# Q39: GENDER
 genderDummy = [0 if g=="Male" else 1 for g in data['Q39'] ]
-print(genderDummy)
+
+# Q42: Amt of Classes
+
+classesAmt = [7 if a=="7+" else int(a) for a in data['Q42'] ]
+
+# Q44: Amt of Clubs
+clubsAmt = [5 if a=="5+" else int(a) for a in data['Q44'] ]
+
+# Q43: Greek Life (1 if involved, 0 if not invovled)
+greekLife = [convertYesNo(r) for r in data['Q43']]
+
 #%%
 
-#%% Q29: Amt of Classes
+#%%  DUMMY VARIABLES
+# Q25:ACTUAL HIGHEST CATEGORY 
+highestActSocial = [convertBinary(s, "Social") for s in data['Q25'] ]
+highestActUtilities = [convertBinary(s, "Utilities") for s in data['Q25'] ]
+highestActProdFin = [convertBinary(s, "Productivity and Finance") for s in data['Q25'] ]
+
+correctlyAssumeCategory = [1 if e==data['Q25'][i] else 0 for i,e in enumerate(data['Q7'])]
 
 #%%
+
+
+#%% DUMMY VARIABLES LIST: Q3, Q4
+
+
+def commonActivites(a):
+    a = a.replace("calendar, notes, school", "calendar notes school")
+    return(a.split(","))
+
+commonActivitiesReported = [commonActivites(a) for a in data['Q3'] ]
+commonActivitiesReportedAmt = [len(a) for a in commonActivitiesReported]
+
+#%%
+
+
+
 
 #%% ALL DATA FOR REGRESSION & PLOTS
 
-organizedData = pd.DataFrame(data = {"age": data['Q38'], 
+organizedData = pd.DataFrame(data = {"hrDiff": hrDiff,
+                                     "age": data['Q38'], 
                                      "gender": genderDummy,
+                                     "classesAmt": classesAmt, 
+                                     "clubsAmt": clubsAmt,
+                                     "greekLife": greekLife,
+                                     "firstSmartphoneAge": firstSmartphoneAge,
+                                     "highestActualSocial": highestActSocial,
+                                     "highestActualUtilities": highestActUtilities,
+                                     "highestActualUProdNFin": highestActProdFin,
+                                     "correctlyAssumeCategory": correctlyAssumeCategory,
+                                     "commonActivitesReportedAmt": commonActivitiesReportedAmt,
                                      "smartphoneDevices" : smartphoneDevices,
                                      "usesScreenRedTech": usesScreenRedTech,
                                      "RedTechnAmt": redTechniquesAmt,
                                      "actualHrs": actualHrs, 
-                                     "estimatedHrs": estimatedHrs, 
-                                     "hrDiff": hrDiff })
+                                     "estimatedHrs": estimatedHrs
+                                      })
 
 #%% 
 
+#%% ANOVA
+
+from scipy.stats import f_oneway
+
+#%%
 
 
 #%% PLOTTING ESTIMATE ERROR
