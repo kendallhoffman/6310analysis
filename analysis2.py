@@ -97,19 +97,45 @@ allqeight = flatten(qeight)
 uniqueAllQEight = pd.Series(allqeight).value_counts()
 
 data['Q8'] = qeight
-        
-        
 
 #%%
 
 
-#%% Useful Questions
-
-# q1: how many devices do you use
-# q6: estimate daily average vs. q24 avg daily screentime
-#q7 category vs. q25 most used category
+#%% Most used Apps
 
 
+# q26 = [q.lower() for q in data["Q26"]]
+
+# twenty_six = pd.DataFrame(data['Q26'])
+
+# twenty_six['Q26'][17] = 'Taobao'
+# twenty_six['Q26'][51] = 'Twitter'
+# twenty_six['Q26'][41] = 'TikTok'
+# twenty_six['Q26'][39] = 'Messages'
+
+# twenty_six['Q26'] = [q.replace("Youtube", "YouTube").replace("iMessages", "Messages").replace("Tiktok", "TikTok").replace("imessage", "Messages").replace("Red book", "Xiaohongshu").replace("Little Red Book", "Xiaohongshu").replace("instagram", "Instagram").strip() for q in twenty_six['Q26']]
+
+# valCountApps = pd.DataFrame(
+#     {"App": twenty_six['Q26'].value_counts().index, 
+#      "Count": twenty_six['Q26'].value_counts()
+#      }).reset_index(drop=True)
+
+# valCountsLots = valCountApps[valCountApps["Count"]> 1]
+# valCountsNotLots = valCountApps[valCountApps["Count"] == 1]
+# plt.barh(valCountsLots.App, valCountsLots.Count, color = "darkred")
+# plt.title("Most Used Apps Frequency")
+# plt.xlabel("Apps")
+# plt.ylabel("Frequency")
+
+# print(valCountsNotLots)
+
+#%%
+
+
+
+
+
+#%% ESTIMATED & ACTUAL(Q24) HOURS
 
 q6 = [d.replace(" hours", "").split("-") for d in data['Q6']]
 
@@ -135,14 +161,8 @@ def convert_to_numerical_time(time_list):
     return numerical_values
 
 
-# Example usage:
 actualHrs = convert_to_numerical_time(data['Q24'])
 
-for h,hr in enumerate(actualHrs):
-   if(hr is None or float(hr) > 24):
-       
-       print("IDX:", int(h), "RAW DATA:", data.Q24[int(h)+3], "NEW DATA:", hr)
-       
 
 actualHrs[0] = 3 + (38/60)
 actualHrs[6] = 2.5
@@ -160,24 +180,73 @@ actualHrs[54] = 3
 
 import matplotlib.pyplot as plt
 
-hrDiff = [actualHrs[h] - estimatedHrs[h] for h in list(range(0, len(estimatedHrs)))]
+hrDiff = [estimatedHrs[h] - actualHrs[h] for h in list(range(0, len(estimatedHrs)))]
 
 hrDiff = [float(hr) for hr in hrDiff]
 actualHrs = [float(hr) for hr in actualHrs]
 estimatedHrs = [float(hr) for hr in estimatedHrs]
 
+#%% 
+
+#%% Q2: NUM OF SMARTPHONE DEVICES
+
+def convertSmartphoneDevices(strNum):
+    if(strNum == '2' or strNum == '1'): 
+        return int(strNum)
+    else:
+        # print(strNum)
+        return 3
+        
+smartphoneDevices = [convertSmartphoneDevices(i) for i in data['Q2']]
+
+
+#%% 
+
+
+
+
+
+
+#%% ALL DATA FOR REGRESSION & PLOTS
 
 organizedData = pd.DataFrame(data = {"age": data['Q38'], 
+                                     "smartphoneDevices" : smartphoneDevices,
                                      "actualHrs": actualHrs, 
                                      "estimatedHrs": estimatedHrs, 
                                      "hrDiff": hrDiff })
 
+#%% 
+
+
+
+#%% PLOTTING ESTIMATE ERROR
+
+
 organizedData = organizedData.drop(12)
 organizedData.reset_index(drop=True)
 
-plt.scatter(organizedData["age"], organizedData["hrDiff"])
-plt.scatter(organizedData["age"].astype(int), organizedData["hrDiff"].astype(int))
+posPred = organizedData[organizedData["hrDiff"] > 0]
+negPred = organizedData[organizedData["hrDiff"] <= 0]
+
+
+
+plt.scatter(negPred["age"], negPred["hrDiff"], color = 'darkred')
+plt.scatter(posPred["age"], posPred["hrDiff"], color = 'darkgreen')
+
+plt.axhline(y = 0.5, color = 'black', linestyle = '-') 
+plt.xlabel("Age")
+plt.ylabel("Average Daily Screen Time Error")
+plt.title("Actual - Estimated Daily Screen Time by Age")
+
+
+
+
+
+
 
 
 
 #%%
+
+
+
