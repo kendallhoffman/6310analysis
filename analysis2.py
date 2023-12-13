@@ -203,14 +203,48 @@ smartphoneDevices = [convertSmartphoneDevices(i) for i in data['Q2']]
 #%% 
 
 
+#%% Q9: USES SCREEN REDUCTION TECHNIQUES
+
+def convertYesNo(resp):
+    if(resp == 'No'):
+        return 0
+    else:
+        return 1
+usesScreenRedTech = [convertYesNo(r) for r in data['Q9']]
+
+#%%
 
 
 
+#%% Q11 TYPES OF SCREEN REDUCTION TECHNIQUES
+
+
+def convertRedTechToList(s):
+    s = s.replace("family, friends,","family friends").replace("computer, keep", "computer keep").replace("brightness, set", "brightness set").replace("silent, face-down, out of sight,", "silent face-down out of sight ").replace(" white), and chan", " white) and chan")
+    return s.split(",")
+
+redTechniques = [convertRedTechToList(s) for s in data['Q11']]
+redTechniquesAmt = [len(s) for s in redTechniques]
+
+#%%
+
+
+#%% Q29: GENDER
+genderDummy = [0 if g=="Male" else 1 for g in data['Q39'] ]
+print(genderDummy)
+#%%
+
+#%% Q29: Amt of Classes
+
+#%%
 
 #%% ALL DATA FOR REGRESSION & PLOTS
 
 organizedData = pd.DataFrame(data = {"age": data['Q38'], 
+                                     "gender": genderDummy,
                                      "smartphoneDevices" : smartphoneDevices,
+                                     "usesScreenRedTech": usesScreenRedTech,
+                                     "RedTechnAmt": redTechniquesAmt,
                                      "actualHrs": actualHrs, 
                                      "estimatedHrs": estimatedHrs, 
                                      "hrDiff": hrDiff })
